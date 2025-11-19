@@ -1,13 +1,13 @@
-from sisepuede.core.analysis_id import AnalysisID
+from exmoto.core.analysis_id import AnalysisID
 import datetime
 import logging
 import numpy as np
 import os, os.path
 import pandas as pd
 from typing import *
-import sisepuede.utilities._toolbox as sf
+import exmoto.utilities._toolbox as sf
 import sqlalchemy
-import sisepuede.utilities._sql as sqlutil
+import exmoto.utilities._sql as sqlutil
 
 
 

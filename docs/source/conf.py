@@ -5,9 +5,9 @@ import sys
 
 # -- Project information
 
-project = "SISEPUEDE"
-copyright = "2024"
-author = "James Syme, Edmundo Molina Perez, Nidhi Kalra"
+project = "EXMOTO"
+copyright = "2025"
+author = "James Syme"
 release = "1.0"
 version = "1.1.0"
 

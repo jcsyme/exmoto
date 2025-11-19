@@ -5,9 +5,9 @@ import pandas as pd
 import re
 from typing import *
 
-from sisepuede.core.attribute_table import AttributeTable, is_attribute_table
-import sisepuede.core.attributes_manager as ma
-import sisepuede.utilities._toolbox as sf
+from exmoto.core.attribute_table import AttributeTable, is_attribute_table
+import exmoto.core.attributes_manager as ma
+import exmoto.utilities._toolbox as sf
 
 
 

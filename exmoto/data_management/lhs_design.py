@@ -5,8 +5,8 @@ import pandas as pd
 import pyDOE2 as pyd
 from typing import *
 
-from sisepuede.core.attribute_table import AttributeTable
-import sisepuede.utilities._toolbox as sf
+from exmoto.core.attribute_table import AttributeTable
+import exmoto.utilities._toolbox as sf
 
 
 

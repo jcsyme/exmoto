@@ -12,10 +12,8 @@ from setuptools import setup
 
 
 
-
 # read in requirements and install
 dir_cur = os.path.dirname(os.path.realpath(__file__))
-fp_julia = os.path.join(dir_cur, "julia")
 fp_requirements = os.path.join(dir_cur, "requirements.txt")
 
 flag_version = "python_version"
@@ -34,37 +32,26 @@ if os.path.isfile(fp_requirements):
 setup(
     author = "James Syme",
     author_email = "jsyme@tec.mx",
-    description = "SImulation of SEctoral Pathways and Uncertainty Exploration for DEcarbonization is a multi-sector, integrated emission accounting and modeling framework for evalauting decarboniation policies under uncertainty.",
+    description = "EXploratory MOdeling TOolkit",
     include_package_data = True,
     license = "MIT",
-    name = "SISEPUEDE",
+    name = "EXMOTO",
     packages = [
-        "sisepuede",
-        "sisepuede.command_line",
-        "sisepuede.core",
-        "sisepuede.data_management",
-        "sisepuede.geo",
-        "sisepuede.manager",
-        "sisepuede.models",
-        "sisepuede.pipeline",
-        "sisepuede.transformers",
-        "sisepuede.transformers.lib",
-        "sisepuede.utilities",
-        "sisepuede.utilities.data_support",
-        "sisepuede.visualization"
+        "exmoto.core",
+        "exmoto.data_management",
+        #"exmoto.manager"
+        "exmoto.utilities",
     ],
     package_data = {
         "": [
             "attributes/**",
             "docs/**",
-            "julia/**",
-            "ref/**",
-            "sisepuede_config.yaml"
+            "ref/**"
         ]
     },
     #python_requires = py_version,
-    url = "http://github.com/jcsyme/sisepuede",
-    version = "1.4.0",
+    url = "http://github.com/jcsyme/exmoto",
+    version = "1.0.0",
     zip_safe = False
 )
 

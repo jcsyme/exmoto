@@ -4,9 +4,9 @@ import os, os.path
 import re
 from typing import *
 
-from sisepuede.core.attribute_table import *
-import sisepuede.core.model_variable as mv
-import sisepuede.utilities._toolbox as sf
+from exmoto.core.attribute_table import *
+import exmoto.core.model_variable as mv
+import exmoto.utilities._toolbox as sf
 
 
 class InvalidUnitError(Exception):

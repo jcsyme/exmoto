@@ -9,11 +9,11 @@ from typing import *
 import warnings
 
 
-from sisepuede.core.attribute_table import *
-from sisepuede.core.configuration import *
-import sisepuede.core.model_variable as mv
-import sisepuede.core.units_manager as um
-import sisepuede.utilities._toolbox as sf
+from exmoto.core.attribute_table import *
+import exmoto.core.model_variable as mv
+import exmoto.core.support_classes as sc
+import exmoto.core.units_manager as um
+import exmoto.utilities._toolbox as sf
 
 
 
@@ -131,8 +131,6 @@ class AttributesManager:
         self._initialize_sector_sets()
         self._initialize_variables_by_subsector()
         self._initialize_all_primary_category_flags()
-        self._initialize_emission_modvars_by_gas()
-        self._initialize_gas_attributes()
         self._initialize_other_dictionaries()
 
         self._check_attribute_tables()
@@ -156,18 +154,6 @@ class AttributesManager:
         # run checks and raise errors if invalid data are found in the attribute tables
         self._check_dimensional_attribute_table_time_periods()
         self._check_attribute_tables_abv_subsector()
-        self._check_attribute_tables_agrc()
-        self._check_attribute_tables_enfu()
-        self._check_attribute_tables_enst()
-        self._check_attribute_tables_entc()
-        self._check_attribute_tables_inen()
-        self._check_attribute_tables_ippu()
-        self._check_attribute_tables_lndu()
-        self._check_attribute_tables_lsmm()
-        self._check_attribute_tables_trde()
-        self._check_attribute_tables_trns()
-        self._check_attribute_tables_wali()
-        self._check_attribute_tables_waso()
 
         return None
 
@@ -923,7 +909,7 @@ class AttributesManager:
     ) -> None:
         """
         Set properties related to substrings used to identify input template
-            fields for SISEPUEDE. Sets the following properties:
+            fields for EXMOTO. Sets the following properties:
 
             * self.substr_analytical_parameters
             * self.substr_experimental_parameters
@@ -979,6 +965,9 @@ class AttributesManager:
             Path to configuration file to read from
         """
 
+
+        configuration = None
+
         # finally, create the full analytical parameter attribute table - concatenate_attribute_tables from attribute_table
         self.attribute_configuration_parameters = concatenate_attribute_tables(
             "configuration_parameter",
@@ -987,22 +976,12 @@ class AttributesManager:
         )
 
         # get configuration
-        self.configuration = Configuration(
-            fp_config,
-            self.get_unit_attribute("area"),
-            self.get_unit_attribute("energy"),
-            self.get_other_attribute_table("emission_gas").attribute_table, # the emission_gas table is stored as a um.Unit
-            self.get_unit_attribute("length"),
-            self.get_unit_attribute("mass"),
-            self.get_unit_attribute("monetary"),
-            self.get_unit_attribute("power"),
-            self.get_other_attribute_table("region"),
-            self.get_dimensional_attribute_table(self.dim_time_period),
-            self.get_unit_attribute("volume"),
-            attr_required_parameters = self.attribute_configuration_parameters,
-        )
+        if isinstance(fp_config, str):
+            configuration = sc.YAMLConfiguration(fp_config, )
 
         # update fp_config
+
+        self.config = configuration
         self.fp_config = fp_config
 
         return None
@@ -1021,109 +1000,6 @@ class AttributesManager:
         """
         
             
-        return None
-
-
-
-    def _initialize_emission_modvars_by_gas(self, #FIXED
-        key_other_totals: str = "multigas",
-    ) -> None:
-        """Get dictionaries that gives all total emission component variables
-            by gas. Sets the following properties:
-
-            * self.dict_gas_to_total_emission_fields
-            * self.dict_gas_to_total_emission_variables
-
-        Keyword Arguments
-        -----------------
-        key_other_totals : str
-            Key to use for gasses that are associated with multiple gasses (if 
-            applicable)
-        """
-        # get tables and initialize dictionary out
-        all_tabs = self.dict_variable_definitions.keys()
-        dict_fields_by_gas = {}
-        dict_modvar_by_gas = {}
-
-        for subsec in self.all_subsectors:
-
-            tab = self.get_attribute_table(
-                subsec, 
-                table_type = self.key_variable_definitions,
-            )
-
-            if tab is None:
-                continue
-
-            tab = tab.table
-
-            modvars = list(
-                tab[
-                    tab[self.field_emissions_total_flag] == 1
-                ]["variable"]
-            )
-
-            for modvar in modvars:
-                # build the variable list
-                varlist = self.build_variable_fields(modvar)
-
-                # get emission and add to dictionary
-                emission = self.get_variable_characteristic(
-                    modvar, 
-                    self.varchar_str_emission_gas,
-                )
-
-                key = emission if (emission is not None) else key_other_totals
-
-                # add to fields by gas
-                (
-                    dict_fields_by_gas[key].extend(varlist)
-                    if key in dict_fields_by_gas.keys()
-                    else dict_fields_by_gas.update({key: varlist})
-                )
-
-                # add to modvars by gas
-                (
-                    dict_modvar_by_gas[key].append(modvar)
-                    if key in dict_modvar_by_gas.keys()
-                    else dict_modvar_by_gas.update({key: [modvar]})
-                )
-
-        
-        ##  SET PROPERTIES
-
-        self.dict_gas_to_total_emission_fields = dict_fields_by_gas
-        self.dict_gas_to_total_emission_variables = dict_modvar_by_gas
-
-        return None
-    
-
-
-    def _initialize_gas_attributes(self,
-    ) -> None:
-        """Initialize some shared gas attribute objects. Sets the following 
-            properties:
-
-            * self.dict_fc_designation_to_gas
-            * self.dict_gas_to_fc_designation
-        """
-
-        dict_fc_designation_to_gas = self.get_fluorinated_compound_dictionaries()
-        dict_gas_to_fc_designation = dict(
-            sum(
-                [
-                    [(x, k) for x in v]
-                    for k, v in dict_fc_designation_to_gas.items()
-                ], []
-            )
-        )
-
-
-        ##  SET PROPERTIES
-
-        self.dict_fc_designation_to_gasses = dict_fc_designation_to_gas
-        self.dict_gas_to_fc_designation = dict_gas_to_fc_designation
-
         return None
     
 
@@ -1218,8 +1094,7 @@ class AttributesManager:
         # all sectors and subsectors + emission subsectors
         all_sectors = sorted(list(attr_sec.table["sector"].unique()))
         all_subsectors = sorted(list(attr_subsec.table["subsector"].unique()))
-        emission_subsectors = self.get_emission_subsectors()
-
+  
         # some subsector splits based on w+w/o primary categories
         l_with = attr_subsec.field_maps.get(
             f"subsector_to_{self.subsector_field_category_py}"
@@ -1236,7 +1111,6 @@ class AttributesManager:
         self.all_subsector_abvs = attr_subsec.key_values
         self.all_subsectors_with_primary_category = l_with
         self.all_subsectors_without_primary_category = l_without
-        self.emission_subsectors = emission_subsectors
 
         return None
     
@@ -1407,7 +1281,6 @@ class AttributesManager:
         # get all variables as a list
         all_variable_fields.sort()
         all_variable_fields_input.sort()
-        all_variable_fields_output += self.get_all_subsector_emission_total_fields()
         all_variable_fields_output.sort()
 
 
@@ -2978,12 +2851,7 @@ class AttributesManager:
         
         
         # if necessary, map abbreivation to emission total fields
-        dict_subsec_field_to_abv = (
-            self.get_all_subsector_emission_total_fields(return_type = "dict_inv_abv", )
-            if (key_type == "emission_field")
-            else attr_subsector.field_maps.get(f"{field_subsector}_to_{attr_subsector.key}")
-        )
-
+        dict_subsec_field_to_abv = attr_subsector.field_maps.get(f"{field_subsector}_to_{attr_subsector.key}")
         dict_subsec_field_to_color = dict(
             (k, dict_subsec_abv_to_color.get(v)) for k, v in dict_subsec_field_to_abv.items()
         )

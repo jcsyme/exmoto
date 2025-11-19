@@ -1,6 +1,6 @@
 """
-SISEPUEDE
-    Copyright (C) 2020-2024 James Syme
+EXMOTO
+    Copyright (C) 2025-2026 James Syme
 
     LICENSE HERE
 
@@ -8,13 +8,12 @@ SISEPUEDE
 
 
 from typing import *
-import sisepuede.core.attribute_table as at
+import exmoto.core.attribute_table as at
 import logging
 import numpy as np
-import os, os.path
 import pandas as pd
 import re
-import sisepuede.utilities._toolbox as sf
+import exmoto.utilities._toolbox as sf
 
 
 ##  GLOBAL VARIABLES
@@ -733,7 +732,7 @@ class ModelVariable:
             return_on_none = {},
         )
 
-       
+
         ##  ITERATE
 
         # set ordering for iteration; put root elements first (if they are specified)
